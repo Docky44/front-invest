@@ -1,8 +1,7 @@
 import React from "react";
-import { Box, CssBaseline, ThemeProvider, createTheme } from "@mui/material";
-import { TopBar } from "./components/TopBar";
+import { ThemeProvider, CssBaseline, createTheme } from "@mui/material";
 import { ProtectedApolloProvider } from "./auth/ProtectedApolloProvider";
-import { Dashboard } from "./pages/Dashboard";
+import { MainLayout } from "./layout/MainLayout";
 
 const theme = createTheme();
 
@@ -10,12 +9,9 @@ export function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box>
-        <TopBar />
-        <ProtectedApolloProvider>
-          <Dashboard />
-        </ProtectedApolloProvider>
-      </Box>
+      <ProtectedApolloProvider>
+        <MainLayout />
+      </ProtectedApolloProvider>
     </ThemeProvider>
   );
 }
