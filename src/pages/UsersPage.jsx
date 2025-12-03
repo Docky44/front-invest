@@ -15,6 +15,7 @@ import {
   UPDATE_USER_STATUS_MUTATION,
   UPDATE_USER_ROLE_MUTATION,
 } from '../graphql/users'
+import { formatShortDate } from '../utils/date.js'
 
 export function UsersPage() {
   const { data, loading, error } = useQuery(USERS_QUERY)
@@ -157,7 +158,7 @@ export function UsersPage() {
               </div>
 
               <p className="text-sm text-gray-400 mt-4 mb-1">Créé le</p>
-              <p className="text-white">{user.createdAt}</p>
+              <p className="text-white">{formatShortDate(user.createdAt)}</p>
             </div>
           ))}
         </div>
