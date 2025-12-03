@@ -30,12 +30,22 @@ export function useApolloClientWithAuth() {
         } catch (e) {
           console.log("getAccessTokenSilently error", e);
 
-          const error = e?.error || e?.message || "";
+          const err = e?.error || e?.message || "";
 
-          if (error === "login_required" || error === "consent_required") {
-            loginWithRedirect({
-              appState: { returnTo: window.location.pathname },
-            });
+          if (
+            err === "login_required" ||
+            err === "consent_required" ||
+            err === "invalid_grant"
+          ) {
+            setTimeout(() => {
+              loginWithRedirect({
+                appState: { returnTo: window.location.pathname },
+                authorizationParams: {
+                  audience: process.env.REACT_APP_AUTH0_AUDIENCE,
+                  scope: "openid profile email",
+                },
+              });
+            }, 0);
           }
 
           token = undefined;
