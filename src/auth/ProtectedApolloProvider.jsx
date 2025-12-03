@@ -6,18 +6,17 @@ import { useAuth0 } from '@auth0/auth0-react'
 import { useApolloClientWithAuth } from '../apollo/client'
 
 export function ProtectedApolloProvider({ children }) {
-  const { isLoading, isAuthenticated, loginWithRedirect } = useAuth0()
+  const { isLoading } = useAuth0()
   const client = useApolloClientWithAuth()
 
-  React.useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      loginWithRedirect()
-    }
-  }, [isLoading, isAuthenticated, loginWithRedirect])
-
-  if (isLoading || !isAuthenticated) {
+  if (isLoading) {
     return (
-      <Box display="flex" alignItems="center" justifyContent="center" minHeight="100vh">
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        minHeight="100vh"
+      >
         <CircularProgress />
       </Box>
     )
