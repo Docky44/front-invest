@@ -13,15 +13,31 @@ const httpLink = new HttpLink({
 });
 
 export function useApolloClientWithAuth() {
-  const auth0 = useAuth0();
+  const { getAccessTokenSilently, loginWithRedirect } = useAuth0();
 
   const authLink = React.useMemo(
     () =>
       setContext(async (_, { headers }) => {
         let token;
+
         try {
-          token = await auth0.getAccessTokenSilently();
-        } catch {
+          token = await getAccessTokenSilently({
+            authorizationParams: {
+              audience: process.env.REACT_APP_AUTH0_AUDIENCE,
+              scope: "openid profile email",
+            },
+          });
+        } catch (e) {
+          console.log("getAccessTokenSilently error", e);
+
+          const error = e?.error || e?.message || "";
+
+          if (error === "login_required" || error === "consent_required") {
+            loginWithRedirect({
+              appState: { returnTo: window.location.pathname },
+            });
+          }
+
           token = undefined;
         }
 
@@ -32,7 +48,7 @@ export function useApolloClientWithAuth() {
           },
         };
       }),
-    [auth0]
+    [getAccessTokenSilently, loginWithRedirect]
   );
 
   return React.useMemo(
