@@ -6,26 +6,36 @@ import {
   MenuItem,
   useMediaQuery,
   useTheme,
+  Typography,
 } from '@mui/material'
+import { useQuery } from '@apollo/client'
+import { get } from 'lodash'
 import TrendingUp from '@mui/icons-material/TrendingUp'
 import Newspaper from '@mui/icons-material/Newspaper'
 import Psychology from '@mui/icons-material/Psychology'
 import AccountBalanceWallet from '@mui/icons-material/AccountBalanceWallet'
 import Logout from '@mui/icons-material/Logout'
 import MenuIcon from '@mui/icons-material/Menu'
+import GroupIcon from '@mui/icons-material/Group'
 import { useAuth0 } from '@auth0/auth0-react'
 import { InvestmentsPage } from '../pages/InvestmentsPage'
 import { NewsPage } from '../pages/NewsPage'
 import { AIPage } from '../pages/AIPage'
+import { UsersPage } from '../pages/UsersPage'
+import { ME_QUERY } from '../graphql/me'
 
 export function MainLayout() {
   const [activeTab, setActiveTab] = useState('investments')
   const [menuAnchor, setMenuAnchor] = useState(null)
   const { logout, user } = useAuth0()
   const theme = useTheme()
-
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'))
   const useBurgerNav = useMediaQuery(theme.breakpoints.down('lg'))
+
+  const { data: meData, loading: meLoading, error: meError } = useQuery(ME_QUERY)
+  const me = get(meData, 'me', null)
+  const role = get(me, 'role', null)
+  const isAdmin = role === 'ADMIN'
 
   const openMenu = (e) => {
     setMenuAnchor(e.currentTarget)
@@ -45,6 +55,37 @@ export function MainLayout() {
     logout({
       logoutParams: { returnTo: window.location.origin },
     })
+  }
+
+  if (meLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white flex items-center justify-center">
+        <Typography>Chargement...</Typography>
+      </div>
+    )
+  }
+
+  if (meError || !me) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white flex items-center justify-center">
+        <Typography>Erreur lors du chargement du profil</Typography>
+      </div>
+    )
+  }
+
+  if (!me.isActive) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white flex items-center justify-center px-4">
+        <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-6 border border-purple-500/30 max-w-md w-full text-center">
+          <Typography variant="h5" className="text-purple-300 mb-3">
+            Compte en attente d&apos;activation
+          </Typography>
+          <Typography variant="body1" className="text-gray-300">
+            Ton compte a été créé mais n&apos;est pas encore activé. Un administrateur doit valider ton accès avant que tu puisses utiliser l&apos;application.
+          </Typography>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -86,6 +127,12 @@ export function MainLayout() {
                   <Psychology className="w-5 h-5 mr-2" />
                   IA
                 </MenuItem>
+                {isAdmin && (
+                  <MenuItem onClick={() => navigate('users')}>
+                    <GroupIcon className="w-5 h-5 mr-2" />
+                    Utilisateurs
+                  </MenuItem>
+                )}
                 <MenuItem onClick={logoutUser}>
                   <Logout className="w-5 h-5 mr-2 text-red-600" />
                   <span className="text-red-600">Déconnexion</span>
@@ -140,6 +187,20 @@ export function MainLayout() {
                   <Psychology className="w-5 h-5" />
                   <span>IA</span>
                 </button>
+
+                {isAdmin && (
+                  <button
+                    onClick={() => setActiveTab('users')}
+                    className={`flex items-center space-x-2 rounded-lg transition-all text-sm ${
+                      activeTab === 'users'
+                        ? 'bg-purple-600 text-white px-4 py-2'
+                        : 'text-gray-300 hover:text-white hover:bg-purple-600/20 px-3 py-1.5'
+                    }`}
+                  >
+                    <GroupIcon className="w-5 h-5" />
+                    <span>Utilisateurs</span>
+                  </button>
+                )}
               </nav>
 
               <div className="flex items-center space-x-2 justify-end">
@@ -175,6 +236,7 @@ export function MainLayout() {
           {activeTab === 'investments' && <InvestmentsPage />}
           {activeTab === 'news' && <NewsPage />}
           {activeTab === 'ia' && <AIPage />}
+          {activeTab === 'users' && isAdmin && <UsersPage />}
         </Box>
       </main>
     </div>
