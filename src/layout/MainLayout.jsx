@@ -65,13 +65,21 @@ export function MainLayout() {
     )
   }
 
-  if (meError || !me) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white flex items-center justify-center">
-        <Typography>Erreur lors du chargement du profil</Typography>
+if (meError || !me) {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white flex items-center justify-center px-4">
+      <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-6 border border-purple-500/30 max-w-md w-full text-center">
+        <Typography variant="h5" className="text-purple-300 mb-3">
+          Erreur lors du chargement du profil
+        </Typography>
+        <Typography variant="body2" className="text-gray-300">
+          {meError?.message || 'Aucune donnée'}
+        </Typography>
       </div>
-    )
-  }
+    </div>
+  )
+}
+
 
   if (!me.isActive) {
     return (
